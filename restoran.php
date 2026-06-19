@@ -15,20 +15,35 @@ echo "[No]  Nama Menu             Harga        \n";
 echo "-----------------------------------------\n";
 
 foreach ($daftar_menu as $nomor => $menu) {
-    // str_pad() biasa: Matok kolom nama 22 karakter, sisa ruang kosong ditambah spasi di KANAN (Rata Kiri)
+    // Merapikan kolom nama (rata kiri, lebar 22 karakter)
     $nama_rapi  = str_pad($menu['nama'], 22, " ");
     
-    // number_format & ',','.' buat maksa format Rupiah (ribuan pakai titik).
-    // STR_PAD_LEFT (Konstanta huruf besar) buat matok kolom harga 11 karakter, spasi di KIRI (Rata Kanan)
+    // Merapikan kolom harga (rata kanan, lebar 11 karakter, tanpa desimal pecahan)
     $harga_rapi = str_pad(number_format($menu['harga'], 0, ',', '.'), 11, " ", STR_PAD_LEFT);
     
     echo "[$nomor]  " . $nama_rapi . "Rp " . $harga_rapi . "\n";
 }
 echo "=========================================\n";
 
-echo "Masukkan Nama Customer: ";
-// fgets buat buka gerbang input keyboard, trim() buat ngebabat "enter gaib" (\n) pas kasir pencet enter
-$nama_customer = trim(fgets(STDIN));
+// ===================================================================
+// PROSES INPUT NAMA CUSTOMER (ANTI-ANGKA & ANTI-KOSONG)
+// ===================================================================
+while (true) {
+    echo "Masukkan Nama Customer: ";
+    $input_nama = trim(fgets(STDIN));
+
+    // Menghapus spasi sementara agar ctype_alpha tidak menganggap spasi sebagai karakter haram
+    $cek_nama = str_replace(' ', '', $input_nama);
+
+    // Filter: Gak boleh kosong, dan wajib berisi huruf murni
+    if ($input_nama === '' || !ctype_alpha($cek_nama)) {
+        echo "❌ ERROR: Nama customer harus berupa huruf saja (Tanpa angka / simbol)!\n\n";
+        continue; 
+    }
+
+    $nama_customer = $input_nama;
+    break; 
+}
 
 $keranjang = [];
 
@@ -36,59 +51,52 @@ $keranjang = [];
 // PROSES BELANJA (PERULANGAN UTAMA)
 // ===================================================================
 while (true) {
-    // Loop menu utama + filter biar ga crash kalau kasir iseng enter kosong atau ngetik huruf
+    
+    // Loop kecil 1: Mengunci validasi pemilihan nomor menu
     while (true) {
         echo "\nPilih Nomor Menu (1-3): ";
         $input_pilihan = trim(fgets(STDIN));
 
-        // '' (String Kosong) di sini buat ngecek apakah kasir langsung asal pencet Enter tanpa ngetik angka
         if ($input_pilihan === '' || !ctype_digit($input_pilihan) || !isset($daftar_menu[intval($input_pilihan)])) {
             echo "❌ MAAF, NOMOR MENU TIDAK ADA! Silakan pilih angka 1 sampai 3.\n";
-            continue; // Mengulang pertanyaan pilih menu saja
+            continue; 
         }
 
-        // intval mengubah teks inputan keyboard menjadi angka murni agar bisa dibaca laci array
         $pilihan = intval($input_pilihan);
-        break; // Keluar dari loop filter menu, lanjut ke jumlah beli
+        break; 
     }
 
-    echo "Jumlah Beli: ";
-    // Nested Loop (Loop bersarang): Khusus mengunci dan mengisolasi error di jumlah beli aja
+    // Loop kecil 2: Mengunci validasi jumlah beli (anti-huruf, anti-nol/minus)
     while (true) {
-        echo "Jumlah Beli (pcs/bungkus - masukkan angka): ";
+        echo "Jumlah Beli (pcs/bungkus): ";
         $input_jumlah = trim(fgets(STDIN));
 
-        // Pengecekan ketat: Apakah langsung di-Enter kosong ('') ATAU bukan angka ATAU angkanya 0/minus
         if ($input_jumlah === '' || !ctype_digit($input_jumlah) || intval($input_jumlah) <= 0) {
-            echo "Input jumlah tidak valid. Masukkan angka bulat positif saja.\n";
-            continue; // Mengulang pertanyaan jumlah beli saja
+            echo "❌ Input jumlah tidak valid. Masukkan angka bulat positif saja (Min. 1).\n\n";
+            continue; 
         }
 
         $jumlah = intval($input_jumlah);
-        break; // Matikan loop jumlah beli, lanjut masukkan ke keranjang
+        break; 
     }
 
-    // ===================================================================
-    // PROSES MEMASUKKAN BARANG KE KERANJANG (PUSH DATA ARRAY)
-    // ===================================================================
-    // Tanda [] artinya tumpuk/tambahkan data baru ini ke baris paling bawah di laci $keranjang.
-    // Di dalamnya kita bikin stiker label ('nama', 'harga', dll) agar datanya terkelompok rapi.
+    // Memasukkan data pesanan yang lolos sensor ke dalam laci keranjang belanja
     $keranjang[] = [
         'nama'     => $daftar_menu[$pilihan]['nama'],
         'harga'    => $daftar_menu[$pilihan]['harga'],
         'qty'      => $jumlah,
-        'subtotal' => $daftar_menu[$pilihan]['harga'] * $jumlah // Otomatis mengalikan harga dengan jumlah beli
+        'subtotal' => $daftar_menu[$pilihan]['harga'] * $jumlah 
     ];
 
     echo "Mau tambah menu lain? (y/n): ";
-    // strtolower buat otomatis ngubah huruf kapital (Y besar) jadi kecil (y kecil) biar ga eror
     $tanya = strtolower(trim(fgets(STDIN)));
 
-    // Operator !== buat cek ketat nilai & tipe data. Kalau kasir ga ngetik 'y', stop belanja
+    // Jika kasir tidak menekan tombol 'y', maka perulangan belanja berhenti
     if ($tanya !== 'y') {
-        break; // break cuma menghentikan perulangan belanja, kode cetak struk di bawah tetap jalan
+        break; 
     }
 
+    // Menampilkan kembali papan menu agar kasir tidak usah scroll layar ke atas
     echo "\n=========================================\n";
     echo "              DAFTAR MENU                \n";
     echo "=========================================\n";
@@ -101,61 +109,62 @@ while (true) {
 }
 
 // ===================================================================
-// HITUNG TOTAL BELANJAAN
+// HITUNG TOTAL BELANJAAN (AKUMULASI)
 // ===================================================================
 $grand_total = 0;
-// kata kunci 'as' di sini bertugas memecah array $keranjang dan mengambil isinya satu per satu untuk dinamai alias $item
 foreach ($keranjang as $item) {
-    $grand_total += $item['subtotal']; // Estafet penjumlahan subtotal ke grand_total
+    $grand_total += $item['subtotal']; 
 }
 
 echo "\n-----------------------------------------\n";
 echo "TOTAL YANG HARUS DIBAYAR: Rp " . number_format($grand_total, 0, ',', '.') . "\n";
+echo "-----------------------------------------\n";
 
 // ===================================================================
-// VALIDASI UANG BAYAR (ANTI KARAKTER ANEH & ANTI KOSONG)
+// PROSES INPUT UANG BAYAR & VALIDASI KECUKUPAN
 // ===================================================================
 while (true) {
     echo "Masukkan Uang Bayar (Rp): ";
     $input_bayar = trim(fgets(STDIN));
 
-    // Filter ketat: Menolak enter kosong (''), menolak karakter aneh/huruf (!ctype_digit), dan menolak nominal minus
+    // Filter: Anti-kosong, anti-huruf, dan anti-minus
     if ($input_bayar === '' || !ctype_digit($input_bayar) || intval($input_bayar) <= 0) {
-        echo "❌ Input salah! Mohon masukkan angka bulat saja (Tanpa huruf, spasi, atau simbol).\n\n";
-        continue; // Memaksa kasir mengulang ketik uang bayar yang benar
+        echo "❌ Input salah! Mohon masukkan angka bulat saja (Tanpa huruf / simbol).\n\n";
+        continue; 
     }
 
     $uang_bayar = intval($input_bayar);
-    break; // Lolos sensor, lanjut ke pengecekan kecukupan uang
+
+    // Cek apakah uangnya kurang dari total belanja
+    if ($uang_bayar < $grand_total) {
+        echo "❌ MAAF, UANG ANDA KURANG! Total tagihan adalah Rp " . number_format($grand_total, 0, ',', '.') . "\n";
+        echo "Silakan masukkan uang bayar yang cukup.\n\n";
+        continue; // Mengulang input uang, program tidak mati bawaan
+    }
+
+    break; 
 }
 
-// Validasi apakah uangnya cukup atau kurang
-if ($uang_bayar < $grand_total) {
-    echo "\n❌ MAAF, UANG ANDA KURANG! Transaksi dibatalkan.\n";
-    exit; // exit langsung mematikan total seluruh program detik ini juga biar struk toko ga kecetak
-}
-
-// Rumus matematika pengurangan untuk mencari uang kembalian
+// Menghitung sisa uang kembalian pembeli
 $kembalian = $uang_bayar - $grand_total;
 
 // ===================================================================
-// OUTPUT STRUK NOTA FINAL
+// OUTPUT STRUK NOTA FINAL RESTORAN
 // ===================================================================
-echo "\n=========================================\n"; // \n di depan berfungsi sebagai Enter otomatis
+echo "\n=========================================\n";
 echo "         ISI KERANJANG BELANJA           \n";
 echo "=========================================\n";
-// ucwords() bikin huruf pertama tiap kata nama customer otomatis jadi kapital/rapi
+// ucwords() otomatis merapikan huruf kapital di awal kata nama customer
 echo "Nama Customer: " . ucwords($nama_customer) . "\n";
 echo "-----------------------------------------\n";
 
-// Mengambil baris produk satu per satu dari $keranjang 'as' (sebagai) variabel tunggal $item
 foreach ($keranjang as $item) {
     echo "- " . str_pad($item['nama'], 15, " ") . " (" . $item['qty'] . "x) = Rp " . number_format($item['subtotal'], 0, ',', '.') . "\n";
 }
 
 echo "-----------------------------------------\n";
-echo "Total Belanja  : Rp " . number_format($grand_total, 0, ',', '.') . "\n"; // Cetak total belanja rapi
-echo "Uang Bayar     : Rp " . number_format($uang_bayar, 0, ',', '.') . "\n";  // Cetak uang yang diinput kasir
-echo "Kembalian      : Rp " . number_format($kembalian, 0, ',', '.') . "\n";   // Cetak hasil pengurangan nominal kembalian
+echo "Total Belanja  : Rp " . number_format($grand_total, 0, ',', '.') . "\n"; 
+echo "Uang Bayar     : Rp " . number_format($uang_bayar, 0, ',', '.') . "\n";  
+echo "Kembalian      : Rp " . number_format($kembalian, 0, ',', '.') . "\n";   
 echo "=========================================\n";
 ?>
