@@ -85,8 +85,7 @@ while (true) {
 
     $uang = intval($input_uang);
 
-    // 🎯 LOGIKA PENGECEKAN UANG KURANG (Saran: Balikin lagi ke transaksi)
-    // Tanda '<' artinya jika uang yang dikasih kasir KURANG DARI total harga bbm...
+    // LOGIKA PENGECEKAN UANG KURANG
     if ($uang < $uang_terpakai) {
         echo "\n❌ MAAF, UANG ANDA KURANG! Total tagihan adalah Rp " . number_format($uang_terpakai, 0, ',', '.') . "\n";
         echo "Silakan masukkan nominal uang bayar yang cukup.\n\n";
@@ -110,8 +109,15 @@ echo "Harga / Liter  : Rp " . number_format($harga_per_liter, 0, ',', '.') . "\n
 echo "-----------------------------------------\n";
 echo "Uang Bayar     : Rp " . number_format($uang_terpakai, 0, ',', '.') . "\n";
 
-// number_format dengan angka 3 memaksa desimal bensin konsisten 3 angka di belakang koma (khas SPBU)
-echo "Bensin Didapat : " . number_format($liter_didapat, 3, ',', '.') . " Liter\n"; 
+// 🔥 LOGIKA PINTAR: Mendeteksi apakah hasil liter merupakan angka bulat atau pecahan desimal
+if (fmod($liter_didapat, 1) == 0) {
+    // Jika angkanya bulat (misal 100.00), dicetak tanpa angka desimal di belakang koma
+    echo "Bensin Didapat : " . number_format($liter_didapat, 0, ',', '.') . " Liter\n"; 
+} else {
+    // Jika angkanya pecahan desimal, dipaksa konsisten 3 angka di belakang koma (khas SPBU)
+    echo "Bensin Didapat : " . number_format($liter_didapat, 3, ',', '.') . " Liter\n"; 
+}
+
 echo "=========================================\n";
 echo "Uang Diterima  : Rp " . number_format($uang, 0, ',', '.') . "\n";
 echo "Kembalian      : Rp " . number_format($kembalian, 0, ',', '.') . "\n";
