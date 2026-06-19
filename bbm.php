@@ -1,12 +1,13 @@
 <?php
+
 // ===================================================================
-// DATA DAFTAR BBM PERTAMINA
+// DATA DAFTAR PILIHAN BBM PERTAMINA
 // ===================================================================
 $daftar_bbm = [
     1 => ["nama" => "Pertalite",       "harga" => 10000],
-    2 => ["nama" => "Pertamax",        "harga" => 12500],
-    3 => ["nama" => "Pertamax Turbo",  "harga" => 14400],
-    4 => ["nama" => "Pertamina Dex",   "harga" => 15100]
+    2 => ["nama" => "Pertamax",        "harga" => 16250], 
+    3 => ["nama" => "Pertamax Turbo",  "harga" => 20750], 
+    4 => ["nama" => "Pertamina Dex",   "harga" => 24800]  
 ]; 
 
 echo "=========================================\n";
@@ -15,6 +16,7 @@ echo "=========================================\n";
 echo "[No]  Jenis BBM             Harga/Liter  \n";
 echo "-----------------------------------------\n";
 
+// Mengulang dan merapikan tampilan daftar BBM ke layar terminal
 foreach ($daftar_bbm as $nomor => $bbm) {
     $nama_rapi  = str_pad($bbm['nama'], 22, " ");
     $harga_rapi = str_pad(number_format($bbm['harga'], 0, ',', '.'), 11, " ", STR_PAD_LEFT);
@@ -25,58 +27,93 @@ echo "=========================================\n";
 echo "\n";
 
 // ===================================================================
-// PERULANGAN UNTUK PILIHAN BBM (BIAR ENGGAK RESTART DARI AWAL)
+// PROSES 1: PILIHAN JENIS BBM (ALUR POS)
 // ===================================================================
 while (true) {
-    // 1. INPUT PILIHAN BENSIN
     echo "Pilihan BBM (1-4): ";
-    $pilihan = intval(trim(fgets(STDIN)));
+    $input_pilihan = trim(fgets(STDIN));
 
-    // VALIDASI: Cek jika nomor bbm tidak ada
-    if (!isset($daftar_bbm[$pilihan])) {
-        // Jika salah, komputer memunculkan pesan ini lalu 'continue' (mengulang pertanyaan di atas)
-        echo "❌ MAAF, NOMOR BBM TIDAK TERSEDIA! Silakan pilih lagi.\n\n";
-        continue; 
+    // Cek apakah input kosong, bukan angka, atau nomor bbm-nya gak terdaftar di array (!isset)
+    if ($input_pilihan === '' || !ctype_digit($input_pilihan) || !isset($daftar_bbm[intval($input_pilihan)])) {
+        echo "\n❌ MAAF, NOMOR BBM TIDAK TERSEDIA! Silakan pilih angka 1 sampai 4.\n";
+        continue; // Mengulang pertanyaan pilihan BBM
     }
+
+    $pilihan = intval($input_pilihan);
+    break; // Lolos validasi, keluar dari loop BBM
+}
+
+// ===================================================================
+// PROSES 2: TENTUKAN NOMINAL BELI (ALUR POS)
+// ===================================================================
+$harga_per_liter = $daftar_bbm[$pilihan]['harga'];
+
+while (true) {
+    echo "Mau beli berapa (Rp)? ";
+    $input_nominal = trim(fgets(STDIN));
+
+    // Validasi dasar: Harus angka bulat positif dan gak boleh kosong
+    if ($input_nominal === '' || !ctype_digit($input_nominal) || intval($input_nominal) <= 0) {
+        echo "❌ Masukkan nominal yang valid.\n";
+        continue;
+    }
+
+    $nominal = intval($input_nominal);
     
-    // Kalau nomornya BENAR, komputer akan menembus baris 'break' ini untuk keluar dari perulangan
+    // Hitung takaran liter yang didapat berdasarkan nominal beli
+    $liter_didapat = $nominal / $harga_per_liter;
+    $uang_terpakai = $nominal; // Nominal ini yang jadi total tagihan belanja bbm
     break; 
 }
 
-// 2. INPUT MAU BELI BENSIN BERAPA (Misal: 20000)
-echo "Mau Beli Bensin Berapa (Rp): ";
-$nominal_beli = intval(trim(fgets(STDIN))); 
-
-// 3. INPUT UANG YANG DIBAYARKAN (Misal: 50000)
-echo "Masukkan Uang Bayar (Rp): ";
-$uang_bayar = intval(trim(fgets(STDIN))); 
-
-// VALIDASI: Cek apakah uangnya cukup atau kurang
-if ($uang_bayar < $nominal_beli) {
-    echo "\n❌ MAAF, UANG ANDA KURANG!\n";
-    exit;
-}
-
-// LOGIKA HITUNGAN BARU:
-// Hitung liter bensin yang didapat
-$liter_didapat = round($nominal_beli / $daftar_bbm[$pilihan]['harga'], 4);
-
-// Hitung uang kembalian
-$kembalian = $uang_bayar - $nominal_beli;
+echo "\n-----------------------------------------\n";
+echo "TOTAL YANG HARUS DIBAYAR: Rp " . number_format($uang_terpakai, 0, ',', '.') . "\n";
+echo "-----------------------------------------\n";
 
 // ===================================================================
-// OUTPUT STRUK NOTA PERTAMINA BARU
+// PROSES 3: INPUT UANG BAYAR & VALIDASI KECUKUPAN (ALUR POS)
+// ===================================================================
+while (true) {
+    echo "Masukkan Uang Tunai / Bayar (Rp): ";
+    $input_uang = trim(fgets(STDIN));
+
+    // Filter anti-karakter aneh dan enter kosong
+    if ($input_uang === '' || !ctype_digit($input_uang) || intval($input_uang) <= 0) {
+        echo "❌ Input tidak valid. Masukkan angka bulat positif saja.\n\n";
+        continue;
+    }
+
+    $uang = intval($input_uang);
+
+    // 🎯 LOGIKA PENGECEKAN UANG KURANG (Saran: Balikin lagi ke transaksi)
+    // Tanda '<' artinya jika uang yang dikasih kasir KURANG DARI total harga bbm...
+    if ($uang < $uang_terpakai) {
+        echo "\n❌ MAAF, UANG ANDA KURANG! Total tagihan adalah Rp " . number_format($uang_terpakai, 0, ',', '.') . "\n";
+        echo "Silakan masukkan nominal uang bayar yang cukup.\n\n";
+        continue; // Menggunakan continue agar program GAK MATI, tapi balik nanya ulang input uang lagi!
+    }
+
+    break; // Uang pas/lebih, lolos validasi dan keluar loop buat cetak struk
+}
+
+// Rumus mencari uang kembalian
+$kembalian = $uang - $uang_terpakai;
+
+// ===================================================================
+// OUTPUT: CETAK STRUK NOTA BBM FINAL
 // ===================================================================
 echo "\n=========================================\n";
 echo "             STRUK NOTA BBM              \n";
 echo "=========================================\n";
 echo "BBM Pilihan    : " . $daftar_bbm[$pilihan]['nama'] . "\n";
-echo "Harga / Liter  : Rp " . number_format($daftar_bbm[$pilihan]['harga'], 0, ',', '.') . "\n";
+echo "Harga / Liter  : Rp " . number_format($harga_per_liter, 0, ',', '.') . "\n";
 echo "-----------------------------------------\n";
-echo "Total Beli     : Rp " . number_format($nominal_beli, 0, ',', '.') . "\n";
-echo "Bensin Didapat : " . $liter_didapat . " Liter\n"; 
-echo "-----------------------------------------\n";
-echo "Uang Bayar     : Rp " . number_format($uang_bayar, 0, ',', '.') . "\n";
+echo "Uang Bayar     : Rp " . number_format($uang_terpakai, 0, ',', '.') . "\n";
+
+// number_format dengan angka 3 memaksa desimal bensin konsisten 3 angka di belakang koma (khas SPBU)
+echo "Bensin Didapat : " . number_format($liter_didapat, 3, ',', '.') . " Liter\n"; 
+echo "=========================================\n";
+echo "Uang Diterima  : Rp " . number_format($uang, 0, ',', '.') . "\n";
 echo "Kembalian      : Rp " . number_format($kembalian, 0, ',', '.') . "\n";
 echo "=========================================\n";
 ?>
