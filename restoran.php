@@ -88,11 +88,22 @@ while (true) {
         'subtotal' => $daftar_menu[$pilihan]['harga'] * $jumlah 
     ];
 
-    echo "Mau tambah menu lain? (y/n): ";
-    $tanya = strtolower(trim(fgets(STDIN)));
+    // 🎯 PERUBAHAN DI SINI: Ditambahkan Loop kecil 3 untuk mengunci jawaban y/n
+    while (true) {
+        echo "Mau tambah menu lain? (y/n): ";
+        $tanya = strtolower(trim(fgets(STDIN)));
 
-    // Jika kasir tidak menekan tombol 'y', maka perulangan belanja berhenti
-    if ($tanya !== 'y') {
+        // SENSOR KETAT: Jika yang diketik bukan 'y' DAN juga bukan 'n'
+        if ($tanya !== 'y' && $tanya !== 'n') {
+            echo "❌ INPUT SALAH! Tolong ketik 'y' untuk tambah menu atau 'n' untuk selesai.\n\n";
+            continue; // Memaksa berputar menanyakan pertanyaan (y/n) ulang
+        }
+        
+        break; // Lolos sensor, keluar dari loop kecil y/n
+    }
+
+    // Jalur keluar dari perulangan belanja utama jika kasir mengetik 'n'
+    if ($tanya === 'n') {
         break; 
     }
 
