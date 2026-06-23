@@ -150,7 +150,7 @@ while (true) {
         // Memanggil fungsi konversi kecepatan. Nilai wadah di atas akan terisi otomatis (Pass-by-reference)
         dapatkanKecepatan($kecepatan_kmjam_display, $kecepatan_mps_hitung, $kecepatan_user);
 
-        // Update hitungan Jarak Total Odometer dan Jarak Sesi ini secara real-time
+        // Update hitungan Jarak Total Odometer and Jarak Sesi ini secara real-time
         $jarak_tempuh_total       = hitungJarakTempuh($jarak_tempuh_total, $kecepatan_mps_hitung);
         $jarak_tertempuh_sesi_ini = hitungJarakTempuh($jarak_tertempuh_sesi_ini, $kecepatan_mps_hitung);
 
@@ -223,13 +223,16 @@ while (true) {
 
         // Jika bensin habis total saat berjalan, hentikan paksa 2 tingkatan loop sekaligus (Mogok di jalan)
         if ($bensin_saat_ini <= 0) {
+            // Pembersihan keras sebelum melempar teks mogok agar sisa spidometer lama hilang total
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') { popen('cls', 'w'); } else { system('clear'); }
             echo "\n❌ MOGOK! Bensin habis di jalan.\n";
             break 2; 
         }
 
-        // Jika jarak yang ditempuh sudah menyamai target, kunci jeda sebentar biar render 00:00 terbaca lalu break
+        // Jika jarak yang ditempuh sudah menyamai target, kunci jeda sebentar lalu bersihkan layar total
         if ($sudah_sampai) {
             sleep(1);
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') { popen('cls', 'w'); } else { system('clear'); }
             break; 
         }
 
