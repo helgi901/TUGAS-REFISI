@@ -2,4 +2,4 @@ id_pinjam ,ktp               ,isbn        ,tgl_pinjam  ,tgl_harus_kembali ,tgl_k
 TRX001    ,1234              ,1           ,2026-06-25  ,2026-06-30        ,2026-06-28  ,TEPAT WAKTU    
 TRX002    ,123               ,2           ,2026-06-25  ,2026-06-30        ,2026-06-31  ,TERLAMBAT (1 Hari)
 TRX003    ,92                ,3           ,2026-06-25  ,2026-06-29        ,2026-07-03  ,TERLAMBAT (4 Hari)
-TRX004    ,0809              ,4           ,2026-06-25  ,2026-07-05        ,-           ,DIPINJAM       
+TRX004    ,0809              ,4           ,2026-06-25  ,2026-07-05        ,2026-07-04  ,TEPAT WAKTU    
