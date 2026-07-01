@@ -1,9 +1,9 @@
 isbn        ,judul                    ,stok 
 1           ,Belajar Ngoding          ,0    
-2           ,Belajar Html             ,1    
+2           ,Belajar Html             ,0    
 3           ,Cara Menjadi Sukses      ,0    
-4           ,Arsitek Masa Depan       ,1    
+4           ,Arsitek Masa Depan       ,0    
 5           ,Seni Menata Gagal        ,1    
-6           ,Penjelajah Bahasa        ,0    
+6           ,Penjelajah Bahasa        ,1    
 7           ,The Midnight Library     ,1    
-8           ,Atomic Habits            ,0    
+8           ,Atomic Habits            ,1    
