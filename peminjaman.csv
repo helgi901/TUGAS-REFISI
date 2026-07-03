@@ -1,5 +1,2 @@
 id_pinjam ,ktp               ,isbn        ,tgl_pinjam  ,tgl_harus_kembali ,tgl_kembali ,status         
-TRX001    ,323               ,2           ,2026-07-01  ,2026-07-06        ,-           ,DIPINJAM       
-TRX002    ,1234              ,4           ,2026-07-01  ,2026-07-08        ,-           ,DIPINJAM       
-TRX003    ,8755              ,1           ,2026-07-01  ,2026-07-08        ,-           ,DIPINJAM       
-TRX004    ,432               ,3           ,2026-07-01  ,2026-07-11        ,-           ,DIPINJAM       
+TRX001    ,3245              ,5           ,2026-07-03  ,2026-07-08        ,2026-07-03  ,TEPAT WAKTU    
