@@ -47,7 +47,7 @@ function inisialisasi_file() {
 // --- 2. FUNGSI BACA CSV ---
 // Fungsi untuk mengambil data mentah dari file teks CSV lalu diubah menjadi array PHP
 // =========================================================================
-function baca_csv($nama_file) {
+function baca_csv(string $nama_file) {
     $data = [];
     if (($f = fopen($nama_file, 'r')) !== FALSE) {
         $headers = fgetcsv($f);
@@ -70,7 +70,7 @@ function baca_csv($nama_file) {
 // --- 3. FUNGSI TULIS CSV MANUWAL ---
 // Fungsi untuk menulis ulang seluruh data dari PHP kembali menjadi file teks CSV yang rapi
 // =========================================================================
-function tulis_csv($nama_file, $headers, $data) {
+function tulis_csv(string $nama_file, array $headers, array $data) {
     $f = fopen($nama_file, 'w');
     $lebar_kolom = [
         'isbn'              => 12,
@@ -108,7 +108,7 @@ function tulis_csv($nama_file, $headers, $data) {
 // =========================================================================
 // --- 4. FUNGSI MENERIMA INPUT TERMINAL ---
 // =========================================================================
-function input($prompt) {
+function input(string $prompt) {
     echo CYAN_SOFT . $prompt . RESET;
     return trim(fgets(STDIN));
 }
@@ -181,10 +181,20 @@ function tambah_peminjam() {
     
     while (true) {
         $nama = input(" ▹ Masukkan Nama       : "); 
+        
+        // 1. Cek jika kosong
         if ($nama === "") {
             echo " " . MERAH_SOFT . "❌ Nama tidak boleh kosong! Silakan isi kembali.\n" . RESET;
             continue; 
         }
+        
+        // 2. Validasi: Hanya boleh huruf (a-z, A-Z) dan spasi
+        // Pola '/^[a-zA-Z ]+$/' artinya dari awal sampai akhir teks wajib huruf atau spasi
+        if (!preg_match('/^[a-zA-Z ]+$/', $nama)) {
+            echo " " . MERAH_SOFT . "❌ Nama hanya boleh berisi huruf dan spasi! Tidak boleh ada angka atau simbol.\n" . RESET;
+            continue;
+        }
+        
         break; 
     }
     
