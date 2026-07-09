@@ -1,0 +1,4 @@
+Mapel;Nilai Terbesar;Nilai Terkecil;Nilai Rata-Rata;Jumlah Nilai
+MTK;=MAX(data_nilai!B2:B4);=MIN(data_nilai!B2:B4);=ROUND(AVERAGE(data_nilai!B2:B4);2);=SUM(data_nilai!B2:B4)
+IPA;=MAX(data_nilai!C2:C4);=MIN(data_nilai!C2:C4);=ROUND(AVERAGE(data_nilai!C2:C4);2);=SUM(data_nilai!C2:C4)
+IPS;=MAX(data_nilai!D2:D4);=MIN(data_nilai!D2:D4);=ROUND(AVERAGE(data_nilai!D2:D4);2);=SUM(data_nilai!D2:D4)
