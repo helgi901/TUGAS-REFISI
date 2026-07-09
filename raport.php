@@ -58,6 +58,7 @@ function inputDataSiswa() {
         fwrite($file, "NO;NAMA\n");
     }
     
+    // PERBAIKAN: Memastikan ada \n di ujung agar data selanjutnya otomatis pindah ke bawah
     fwrite($file, $no_siswa . ";" . $nama_siswa . "\n");
     fclose($file);
     echo "✅ Data siswa berhasil disimpan!\n";
@@ -81,6 +82,7 @@ function inputNilaiSiswa() {
         fwrite($file, "NO;MTK;IPA;IPS\n"); // Mengunci header di file data_nilai
     }
 
+    // PERBAIKAN FATAL: Ditambahkan "\n" di bagian paling ujung agar siswa selanjutnya otomatis turun ke baris baru!
     fwrite($file, $no_siswa . ";" . $mtk . ";" . $ipa . ";" . $ips . "\n");
     fclose($file);
     echo "✅ Data nilai berhasil disimpan!\n";
