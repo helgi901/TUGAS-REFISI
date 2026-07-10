@@ -30,11 +30,17 @@ function jalankanAplikasi() {
     }
 }
 
-// MENU 1: Input Data Siswa (Tetap aman anti-duplikat)
+// MENU 1: Input Data Siswa (Sekarang Wajib Angka & Anti-Duplikat)
 function inputDataSiswa() {
     echo "\n--- INPUT DATA SISWA ---\n";
     echo "Masukkan No Siswa: ";
     $no_siswa = trim(fgets(STDIN));
+
+    // VALIDASI 1: Harus Angka!
+    if (!is_numeric($no_siswa)) {
+        echo "❌ Gagal! No Siswa harus berupa ANGKA, tidak boleh huruf atau simbol.\n";
+        return;
+    }
 
     if (file_exists("data_siswa.csv")) {
         $file_baca = fopen("data_siswa.csv", "r");
@@ -58,17 +64,37 @@ function inputDataSiswa() {
         fwrite($file, "NO;NAMA\n");
     }
     
-    // PERBAIKAN: Memastikan ada \n di ujung agar data selanjutnya otomatis pindah ke bawah
     fwrite($file, $no_siswa . ";" . $nama_siswa . "\n");
     fclose($file);
     echo "✅ Data siswa berhasil disimpan!\n";
 }
 
-// MENU 2: Input Nilai (Otomatis tulis judul kolom permanen tanpa nama)
+// MENU 2: Input Nilai (Sekarang Wajib Angka & Anti-Double Nilai)
 function inputNilaiSiswa() {
     echo "\n--- INPUT NILAI SISWA ---\n";
     echo "Masukkan No Siswa: ";
     $no_siswa = trim(fgets(STDIN));
+
+    // VALIDASI 1: Harus Angka!
+    if (!is_numeric($no_siswa)) {
+        echo "❌ Gagal! No Siswa harus berupa ANGKA.\n";
+        return;
+    }
+
+    // VALIDASI 2: Cek apakah No Siswa ini sudah pernah diinput nilainya
+    if (file_exists("data_nilai.csv")) {
+        $file_baca_nilai = fopen("data_nilai.csv", "r");
+        while (($line = fgets($file_baca_nilai)) !== FALSE) {
+            $data = explode(";", trim($line));
+            if (isset($data[0]) && $data[0] == $no_siswa) {
+                echo "❌ Gagal! Nilai untuk No Siswa [$no_siswa] sudah pernah diinput sebelumnya.\n";
+                fclose($file_baca_nilai);
+                return;
+            }
+        }
+        fclose($file_baca_nilai);
+    }
+
     echo "Masukkan Nilai MTK: ";
     $mtk = trim(fgets(STDIN));
     echo "Masukkan Nilai IPA: ";
@@ -76,30 +102,33 @@ function inputNilaiSiswa() {
     echo "Masukkan Nilai IPS: ";
     $ips = trim(fgets(STDIN));
 
+    // VALIDASI 3: Pastikan nilainya juga angka
+    if (!is_numeric($mtk) || !is_numeric($ipa) || !is_numeric($ips)) {
+        echo "❌ Gagal! Nilai MAPEL harus berupa angka.\n";
+        return;
+    }
+
     $buat_header = !file_exists("data_nilai.csv");
     $file = fopen("data_nilai.csv", "a");
     if ($buat_header) {
-        fwrite($file, "NO;MTK;IPA;IPS\n"); // Mengunci header di file data_nilai
+        fwrite($file, "NO;MTK;IPA;IPS\n");
     }
 
-    // PERBAIKAN FATAL: Ditambahkan "\n" di bagian paling ujung agar siswa selanjutnya otomatis turun ke baris baru!
     fwrite($file, $no_siswa . ";" . $mtk . ";" . $ipa . ";" . $ips . "\n");
     fclose($file);
     echo "✅ Data nilai berhasil disimpan!\n";
 }
 
-// MENU 3: Cetak Nilai Raport Per Siswa (Bebas Error Undefined Variable)
+// MENU 3: Cetak Nilai Raport Per Siswa
 function cetakRaportSiswa() {
     echo "\n--- CETAK NILAI RAPORT ---\n";
     echo "Masukkan No Siswa yang dicari: ";
     $cari_no = trim(fgets(STDIN));
 
-    // Inisialisasi awal agar extension VS Code tidak protes kuning
     $mtk = 0; $ipa = 0; $ips = 0;
     $nama_siswa = "Siswa Tanpa Nama";
     $nilai_ditemukan = false;
 
-    // 1. Ambil Nama Siswa dari data_siswa.csv
     if (file_exists("data_siswa.csv")) {
         $file_siswa = fopen("data_siswa.csv", "r");
         while (($line = fgets($file_siswa)) !== FALSE) {
@@ -112,10 +141,9 @@ function cetakRaportSiswa() {
         fclose($file_siswa);
     }
 
-    // 2. Ambil Nilai berdasarkan struktur kolom baru (MTK=1, IPA=2, IPS=3)
     if (file_exists("data_nilai.csv")) {
         $file_nilai = fopen("data_nilai.csv", "r");
-        fgets($file_nilai); // Lewati header teks
+        fgets($file_nilai); 
         while (($line = fgets($file_nilai)) !== FALSE) {
             $data = explode(";", trim($line));
             if (isset($data[0]) && $data[0] == $cari_no) {
@@ -158,7 +186,7 @@ function cetakRaportSiswa() {
     echo "=========================================\n";
 }
 
-// MENU 4: Analisa Tabel (Tampilan Terminal Premium + Kunci Judul Kolom Excel)
+// MENU 4: Analisa Tabel
 function analisaTabelMapel() {
     if (!file_exists("data_nilai.csv")) {
         echo "\n❌ Belum ada data nilai untuk dianalisa.\n";
@@ -169,7 +197,7 @@ function analisaTabelMapel() {
     $jumlah_baris = 0;
 
     $file = fopen("data_nilai.csv", "r");
-    fgets($file); // Skip baris pertama header nilai (NO;MTK;IPA;IPS)
+    fgets($file); 
 
     while (($line = fgets($file)) !== FALSE) {
         $data = explode(";", trim($line));
@@ -201,7 +229,6 @@ function analisaTabelMapel() {
     $stats_ipa = $hitung_stats($all_ipa);
     $stats_ips = $hitung_stats($all_ips);
 
-    // 1. Cetak Visual ke Terminal (Sangat Rapi & Simetris)
     echo "\n=========================================================================\n";
     echo "                             TABEL ANALISA                               \n";
     echo "=========================================================================\n";
@@ -214,14 +241,11 @@ function analisaTabelMapel() {
     echo sprintf("| %-7s | %-14s | %-14s | %-15s | %-12s |\n", "IPS", $stats_ips['max'], $stats_ips['min'], $stats_ips['avg'], $stats_ips['sum']);
     echo "=========================================================================\n";
 
-    // 2. Tulis File CSV dengan Judul Kolom Permanen (Bebas Column4!)
     $baris_akhir = $jumlah_baris + 1; 
     $file_excel = fopen("data_analisa.csv", "w");
     
-    // Judul kolom kelima dikunci sebagai 'Jumlah Nilai'
     fwrite($file_excel, "Mapel;Nilai Terbesar;Nilai Terkecil;Nilai Rata-Rata;Jumlah Nilai\n");
     
-    // Kirim rumus makro Excel otomatis
     fwrite($file_excel, "MTK;=MAX(data_nilai!B2:B" . $baris_akhir . ");=MIN(data_nilai!B2:B" . $baris_akhir . ");=ROUND(AVERAGE(data_nilai!B2:B" . $baris_akhir . ");2);=SUM(data_nilai!B2:B" . $baris_akhir . ")\n");
     fwrite($file_excel, "IPA;=MAX(data_nilai!C2:C" . $baris_akhir . ");=MIN(data_nilai!C2:C" . $baris_akhir . ");=ROUND(AVERAGE(data_nilai!C2:C" . $baris_akhir . ");2);=SUM(data_nilai!C2:C" . $baris_akhir . ")\n");
     fwrite($file_excel, "IPS;=MAX(data_nilai!D2:D" . $baris_akhir . ");=MIN(data_nilai!D2:D" . $baris_akhir . ");=ROUND(AVERAGE(data_nilai!D2:D" . $baris_akhir . ");2);=SUM(data_nilai!D2:D" . $baris_akhir . ")\n");
