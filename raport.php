@@ -30,13 +30,13 @@ function jalankanAplikasi() {
     }
 }
 
-// MENU 1: Input Data Siswa (Sekarang Wajib Angka & Anti-Duplikat)
+// MENU 1: Input Data Siswa (Wajib Angka & Anti-Duplikat No Siswa)
 function inputDataSiswa() {
     echo "\n--- INPUT DATA SISWA ---\n";
     echo "Masukkan No Siswa: ";
     $no_siswa = trim(fgets(STDIN));
 
-    // VALIDASI 1: Harus Angka!
+    // VALIDASI: No Siswa harus berupa angka
     if (!is_numeric($no_siswa)) {
         echo "❌ Gagal! No Siswa harus berupa ANGKA, tidak boleh huruf atau simbol.\n";
         return;
@@ -64,24 +64,25 @@ function inputDataSiswa() {
         fwrite($file, "NO;NAMA\n");
     }
     
+    // Dipastikan menggunakan "\n" agar baris berikutnya otomatis turun ke bawah
     fwrite($file, $no_siswa . ";" . $nama_siswa . "\n");
     fclose($file);
     echo "✅ Data siswa berhasil disimpan!\n";
 }
 
-// MENU 2: Input Nilai (Sekarang Wajib Angka & Anti-Double Nilai)
+// MENU 2: Input Nilai (Wajib Angka, Anti-Double, & Kunci Batas Nilai 0-100)
 function inputNilaiSiswa() {
     echo "\n--- INPUT NILAI SISWA ---\n";
     echo "Masukkan No Siswa: ";
     $no_siswa = trim(fgets(STDIN));
 
-    // VALIDASI 1: Harus Angka!
+    // VALIDASI 1: No Siswa harus angka
     if (!is_numeric($no_siswa)) {
         echo "❌ Gagal! No Siswa harus berupa ANGKA.\n";
         return;
     }
 
-    // VALIDASI 2: Cek apakah No Siswa ini sudah pernah diinput nilainya
+    // VALIDASI 2: Cek apakah No Siswa ini sudah punya nilai di CSV
     if (file_exists("data_nilai.csv")) {
         $file_baca_nilai = fopen("data_nilai.csv", "r");
         while (($line = fgets($file_baca_nilai)) !== FALSE) {
@@ -102,9 +103,15 @@ function inputNilaiSiswa() {
     echo "Masukkan Nilai IPS: ";
     $ips = trim(fgets(STDIN));
 
-    // VALIDASI 3: Pastikan nilainya juga angka
+    // VALIDASI 3: Nilai raport harus berupa angka
     if (!is_numeric($mtk) || !is_numeric($ipa) || !is_numeric($ips)) {
         echo "❌ Gagal! Nilai MAPEL harus berupa angka.\n";
+        return;
+    }
+
+    // VALIDASI 4: Mengunci batas nilai agar wajib berada di rentang 0 sampai 100
+    if ($mtk < 0 || $mtk > 100 || $ipa < 0 || $ipa > 100 || $ips < 0 || $ips > 100) {
+        echo "❌ Gagal! Input ditolak. Nilai sekolah harus berada di rentang 0 sampai 100!\n";
         return;
     }
 
@@ -114,6 +121,7 @@ function inputNilaiSiswa() {
         fwrite($file, "NO;MTK;IPA;IPS\n");
     }
 
+    // Dipastikan menggunakan "\n" di ujung agar baris berikutnya otomatis di bawahnya
     fwrite($file, $no_siswa . ";" . $mtk . ";" . $ipa . ";" . $ips . "\n");
     fclose($file);
     echo "✅ Data nilai berhasil disimpan!\n";
@@ -186,7 +194,7 @@ function cetakRaportSiswa() {
     echo "=========================================\n";
 }
 
-// MENU 4: Analisa Tabel
+// MENU 4: Analisa Tabel (Tampilan Terminal Rapi Kotak + Rumus Makro Excel)
 function analisaTabelMapel() {
     if (!file_exists("data_nilai.csv")) {
         echo "\n❌ Belum ada data nilai untuk dianalisa.\n";
