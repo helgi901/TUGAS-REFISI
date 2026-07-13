@@ -64,7 +64,7 @@ function inputDataSiswa() {
         fwrite($file, "NO;NAMA\n");
     }
     
-    // Dipastikan menggunakan "\n" agar baris berikutnya otomatis turun ke bawah
+    // Menggunakan "\n" agar baris berikutnya otomatis turun ke bawah
     fwrite($file, $no_siswa . ";" . $nama_siswa . "\n");
     fclose($file);
     echo "✅ Data siswa berhasil disimpan!\n";
@@ -121,17 +121,23 @@ function inputNilaiSiswa() {
         fwrite($file, "NO;MTK;IPA;IPS\n");
     }
 
-    // Dipastikan menggunakan "\n" di ujung agar baris berikutnya otomatis di bawahnya
+    // Menggunakan "\n" di ujung agar baris berikutnya otomatis di bawahnya
     fwrite($file, $no_siswa . ";" . $mtk . ";" . $ipa . ";" . $ips . "\n");
     fclose($file);
     echo "✅ Data nilai berhasil disimpan!\n";
 }
 
-// MENU 3: Cetak Nilai Raport Per Siswa
+// MENU 3: Cetak Nilai Raport Per Siswa (Wajib Angka Saat Cari Nomor)
 function cetakRaportSiswa() {
     echo "\n--- CETAK NILAI RAPORT ---\n";
     echo "Masukkan No Siswa yang dicari: ";
     $cari_no = trim(fgets(STDIN));
+
+    // VALIDASI: Cari nomor siswa WAJIB pakai angka, huruf langsung DIBLOK!
+    if (!is_numeric($cari_no)) {
+        echo "❌ Gagal! No Siswa yang dicari harus berupa ANGKA.\n";
+        return;
+    }
 
     $mtk = 0; $ipa = 0; $ips = 0;
     $nama_siswa = "Siswa Tanpa Nama";
